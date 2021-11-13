@@ -1,0 +1,29 @@
+# BEGIN PASSWORD PROTECTED URL
+
+AuthName "Protected Area"
+AuthType Basic
+AuthUserFile /home/user1/.htpasswd
+AuthGroupFile /dev/null
+
+#UNPROTECTED URL 
+SetEnvIf Request_URI .* noauth
+
+#PROTECTED URL
+SetEnvIf Request_URI /Dev/secret.html !noauth
+
+<IfModule mod_authz_core.c>
+    <RequireAny>
+        Require env noauth
+        Require valid-user
+    </RequireAny>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+    Satisfy any
+    Require valid-user
+    Allow from env=noauth
+</IfModule>
+
+# END PASSWORD PROTECTED URL
