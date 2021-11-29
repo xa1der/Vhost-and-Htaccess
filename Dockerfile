@@ -10,6 +10,17 @@ RUN apt-get update && apt-get install -y tzdata
 RUN apt-get install apache2-utils -y
 
 RUN apt-get install -y apache2 -y
+
+###Self Signed CERT##########
+RUN apt-get update && \
+    apt-get install -y openssl && \
+    openssl genrsa -des3 -passout pass:x -out /etc/ssl/private/server.pass.key 2048 && \
+    openssl rsa -passin pass:x -in /etc/ssl/private/server.pass.key -out /etc/ssl/private/server.key && \
+    rm /etc/ssl/private/server.pass.key && \
+    openssl req -new -key /etc/ssl/private/server.key -out /etc/ssl/certs/server.csr \
+        -subj "/C=UK/ST=Warwickshire/L=Leamington/O=OrgName/OU=IT Department/CN=site1.internal/CN=site2.internal/CN=site3.internal" && \
+    openssl x509 -req -days 365 -in /etc/ssl/certs/server.csr -signkey /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt
+
 ###USER 1 Configurations #####
 RUN useradd -ms /bin/bash user1
 
@@ -49,6 +60,12 @@ COPY ./site1.conf /etc/apache2/sites-available
 COPY ./site2.conf /etc/apache2/sites-available
 
 COPY ./site3.conf /etc/apache2/sites-available
+
+COPY ./site1-ssl.conf /etc/apache2/sites-available
+
+COPY ./site2-ssl.conf /etc/apache2/sites-available
+
+COPY ./site3-ssl.conf /etc/apache2/sites-available
 
 RUN a2ensite site1.conf
 
