@@ -1,14 +1,10 @@
-# BEGIN PASSWORD PROTECTED URL
-
 AuthName "Protected Area"
 AuthType Basic
 AuthUserFile /home/user1/.htpasswd
 AuthGroupFile /dev/null
 
-#UNPROTECTED URL 
 SetEnvIf Request_URI .* noauth
 
-#PROTECTED URL
 SetEnvIf Request_URI /Dev/secret.html !noauth
 
 <IfModule mod_authz_core.c>
@@ -26,4 +22,3 @@ SetEnvIf Request_URI /Dev/secret.html !noauth
     Allow from env=noauth
 </IfModule>
 
-# END PASSWORD PROTECTED URL
