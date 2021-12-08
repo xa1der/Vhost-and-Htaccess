@@ -11,6 +11,22 @@ RUN apt-get install apache2-utils -y
 
 RUN apt-get install -y apache2 -y
 
+#####Proxy Install and enable####
+RUN apt-get update
+
+RUN service apache2 stop
+
+RUN service apache2 start
+
+RUN service apache2 restart
+
+RUN a2enmod proxy
+
+RUN a2enmod proxy_http
+
+RUN a2enmod proxy_balancer
+
+RUN a2enmod lbmethod_byrequests
 ###Self Signed CERT##########
 RUN apt-get update && \
     apt-get install -y openssl && \
@@ -18,7 +34,7 @@ RUN apt-get update && \
     openssl rsa -passin pass:x -in /etc/ssl/private/server.pass.key -out /etc/ssl/private/server.key && \
     rm /etc/ssl/private/server.pass.key && \
     openssl req -new -key /etc/ssl/private/server.key -out /etc/ssl/certs/server.csr \
-        -subj "/C=UK/ST=Warwickshire/L=Leamington/O=OrgName/OU=IT Department/CN=site1.internal/CN=site2.internal/CN=site3.internal" && \
+        -subj "/C=UK/ST=Warwickshire/L=Leamington/O=OrgName/OU=IT Department/CN=site1.internal" && \
     openssl x509 -req -days 365 -in /etc/ssl/certs/server.csr -signkey /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt
 
 ###USER 1 Configurations #####
@@ -43,35 +59,37 @@ USER root
 
 RUN a2dissite 000-default.conf
 
-RUN mkdir /var/www/html/site1
-
 RUN mkdir /var/www/html/site2
 
 RUN mkdir /var/www/html/site3
-
-COPY ./domain1.html /var/www/html/site1
 
 COPY ./domain2.html /var/www/html/site2
 
 COPY ./domain3.html /var/www/html/site3
 
+#############Upate images for site1.internal######
+RUN mkdir /home/images
+
+COPY ./image1.jpg /home/images
+
+COPY ./image2.jpg /home/images
+
+COPY ./image3.jpg /home/images
+######################################
+
 COPY ./site1.conf /etc/apache2/sites-available
 
-COPY ./site2.conf /etc/apache2/sites-available
+COPY ./proxy-site2.conf /etc/apache2/sites-available
 
-COPY ./site3.conf /etc/apache2/sites-available
+COPY ./proxy-site3.conf /etc/apache2/sites-available
 
-COPY ./site1-ssl.conf /etc/apache2/sites-available
-
-COPY ./site2-ssl.conf /etc/apache2/sites-available
-
-COPY ./site3-ssl.conf /etc/apache2/sites-available
+COPY ./proxy-site1-ssl.conf /etc/apache2/sites-available
 
 RUN a2ensite site1.conf
 
-RUN a2ensite site2.conf 
+RUN a2ensite proxy-site2.conf 
 
-RUN a2ensite site3.conf 
+RUN a2ensite prxy-site3.conf 
 
 RUN service apache2 restart
 
